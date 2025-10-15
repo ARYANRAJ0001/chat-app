@@ -1,5 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap");
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css');
+
 * {
   margin: 0;
   padding: 0;
@@ -7,15 +8,14 @@
   font-family: "Poppins", sans-serif;
 }
 
-body{
+body {
   overflow-y: hidden;
 }
-
 
 /*******************************************************
 *************CSS STYLES FOR LOGIN & SIGNUP**************
 ********************************************************/
-.container-back-img{
+.container-back-img {
   background-image: url('./../public/images/quick-chat-app-background.jpg');
   background-repeat: no-repeat;
   background-size: cover;
@@ -24,7 +24,8 @@ body{
   position: absolute;
   z-index: -2;
 }
-.container-back-color{
+
+.container-back-color {
   background-color: #232223;
   opacity: 0.7;
   width: 100%;
@@ -32,6 +33,7 @@ body{
   position: absolute;
   z-index: -1;
 }
+
 .container {
   height: 100vh;
   width: 100%;
@@ -48,15 +50,16 @@ body{
   background-color: #7a747438;
   padding: 10px 30px;
 }
-.column{
+
+.column {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
 }
 
-.form .column input{
-  width: calc(100% / 2 - 2px); 
-} 
+.form .column input {
+  width: calc(100% / 2 - 2px);
+}
 
 .card_title {
   text-align: center;
@@ -111,36 +114,36 @@ body{
   margin-left: 5px;
 }
 
-
 /********************************************************************
 ***************************CSS FOR LOADIER**************************
 ********************************************************************/
-
-.loader-overlay{
-  position: fixed; /* Sit on top of the page content */
-  width: 100%; /* Full width (cover the whole page) */
-  height: 100%; /* Full height (cover the whole page) */
+.loader-overlay {
+  position: fixed;
+  width: 100%;
+  height: 100%;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(144, 97, 92, 0.7); /* Black background with opacity */
-  z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+  background-color: rgba(144, 97, 92, 0.7);
+  z-index: 2;
   align-items: center;
   display: flex;
   justify-content: center;
 }
- 
+
 .loader-spinner,
 .loader-spinner:after {
   box-sizing: border-box;
 }
+
 .loader-spinner {
   display: inline-block;
   position: relative;
   width: 80px;
   height: 80px;
 }
+
 .loader-spinner:after {
   content: " ";
   display: block;
@@ -153,6 +156,7 @@ body{
   border-color: white transparent white transparent;
   animation: loader-spinner 1.2s infinite;
 }
+
 @keyframes loader-spinner {
   0% {
     transform: rotate(0);
@@ -167,35 +171,33 @@ body{
   }
 }
 
-
 /*******************************************************
 ********CSS FOR HOME PAGE*******************************
 ********************************************************/
 .home-page {
-  background-color: #b30e0e;
+  background-color: #7d6868;
   background-image: url('./../public/images/homepage2.jpg');
   background-repeat: no-repeat;
-  background-size: cover; /* makes it cover the full screen */
-  background-position: center; /* centers the image */
-  background-attachment: fixed; /* optional: makes it stay fixed on scroll */
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
 }
 
-.main-content{
+.main-content {
   display: flex;
   width: 90%;
   margin: 10px auto;
   padding: 10px 10px;
-  flex:1;
+  flex: 1;
 }
-
 
 /*******************************************************
 ********CSS FOR HEADER COMPONENT************************
 ********************************************************/
-.app-header{
+.app-header {
   display: flex;
   flex-wrap: wrap;
   width: 100%;
@@ -204,7 +206,7 @@ body{
   border-bottom: #240202 1px solid;
 }
 
-.app-logo{
+.app-logo {
   display: flex;
   flex-wrap: nowrap;
   color: #3faab2;
@@ -212,15 +214,15 @@ body{
   font-weight: bold;
 }
 
-i{
+i {
   margin: 5px 10px;
 }
 
-.app-user-profile{
+.app-user-profile {
   display: flex;
 }
 
-.logged-user-name{
+.logged-user-name {
   color: #2c7594;
   font-weight: bold;
   padding-top: 10px;
@@ -228,7 +230,7 @@ i{
   margin-left: 15px;
 }
 
-.logged-user-profile-pic{
+.logged-user-profile-pic {
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -245,76 +247,116 @@ i{
 /*******************************************************
 ********CSS FOR SIDEBAR COMPONENT************************
 ********************************************************/
-.app-sidebar{
+.app-sidebar {
   width: 30%;
   padding: 0px 20px;
 }
 
-
 /*******************************************************
 ********CSS FOR SEARCH COMPONENT************************
 ********************************************************/
-.user-search-area{
-  
+.user-search-area {
   margin-bottom: 20px;
   position: relative;
+  padding: 15px;
+  border-bottom: 1px solid #9d5b5b;
   
 }
 
-.user-search-text{
+.user-search-text {
   width: 100%;
   height: 40px;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 20px;
-  color: #5b5b6a;
-  border: #6e0808 1px solid;
+  padding: 12px 45px 12px 15px;
+  border: 1px solid #b65f5f;
+  border-radius: 25px;
+  color: #9b9bac;
+  outline: none;
+  font-size: 14px;
+  background: rgba(159, 148, 148, 0);
 }
 
-.user-search-btn{
+.user-search-text:focus {
+  border-color: #007bff;
+}
+
+.user-search-btn {
   position: absolute;
-  right: 10px;
+  right: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
   font-size: 25px;
-  color: #bb6d65;
 }
-
 
 /*******************************************************
 ********CSS FOR USER LIST COMPONENT*********************
 ********************************************************/
-.filtered-user{
-  border-bottom: #cd6815 1px solid;
-  padding: 10px 10px;
-  color: #cb6549;
-  cursor: pointer;
-  background-color: rgb(11, 54, 123);
-}
-.selected-user{
-  border-bottom: #a72222 1px solid;
-  padding: 10px 10px;
-  color: rgb(56, 184, 77);
-  cursor: pointer;
-  background-color: #2d3032;
+.sidebar-scroll {
+  max-height: 80vh;
+  overflow-y: auto;
+  padding-right: 5px;
 }
 
-.filter-user-display{
+.filtered-user,
+.selected-user {
+  border-bottom: none;
+  margin-bottom: 8px;
+  border-radius: 10px;
+  padding: 10px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.filtered-user {
+  background-color: rgba(147, 137, 137, 0.409);
+  color: #cb6549;
+}
+
+.selected-user {
+  background-color: #8f7d7d42;
+  color: rgb(56, 184, 77);
+}
+
+.filtered-user:hover {
+  background-color: #805555;
+  color: #fff;
+}
+
+.filter-user-display {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
 }
-.filter-user-details{
+
+.filter-user-details {
   width: 60%;
+  flex: 1;
+  min-width: 0;
 }
-.user-display-name{
+
+.user-display-name {
   padding: 1px 20px;
   font-size: 16px;
   font-weight: bold;
-}
-.user-display-email{
-  padding: 1px 20px;
-  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.user-default-avatar, .user-profile-image, .user-selected-avatar{
+.user-display-email {
+  padding: 1px 20px;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-default-avatar,
+.user-profile-image,
+.user-selected-avatar {
   width: 50px;
   height: 50px;
   border-radius: 50%;
@@ -324,19 +366,22 @@ i{
   vertical-align: middle;
   line-height: 50px;
 }
-.user-default-avatar{
+
+.user-default-avatar {
   background-color: #9f8683;
   color: rgb(14, 13, 13);
 }
-.user-selected-avatar{
+
+.user-selected-avatar {
   background-color: white;
   color: #e74c3c;
 }
 
-.user-start-chat{
+.user-start-chat {
   padding: 10px 0px;
 }
-.user-start-chat-btn{
+
+.user-start-chat-btn {
   padding: 10px 5px;
   border: none;
   border-radius: 3px;
@@ -344,169 +389,7 @@ i{
   color: rgb(150, 59, 59);
 }
 
-/*******************************************************
-*************CSS STYLES FOR CHAT AREA**************
-********************************************************/
-
-.app-chat-area{
-  background-color: rgba(134, 116, 116, 0.16);
-  width: 70%;
-  padding: 20px 30px;
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  height: 85vh;
-}
-
-/*******************************************************
-*************CSS STYLES FOR CHAT AREA HEADER************
-********************************************************/
-.app-chat-area-header{
-    padding: 10px 30px;
-    margin-bottom: 20px;
-    border-bottom: #9aa1a5 1px solid;
-    text-align: right;
-    font-weight: bold;
-    color: #ce7d27;
-}
-
-/*******************************************************
-********CSS STYLES FOR CHAT AREA & CHAT INPUT***********
-********************************************************/
-.main-chat-area{
-  flex: 1;
-  overflow-y: scroll;
-  padding: 10px 20px;
-}
-
-.send-message-div{
-  position: relative;
-  margin-top: 20px;
-}
-
-.send-message-input{
-  width: 100%;
-  height: 40px;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  color: #c79427;
-  border: #dad4d4 1px solid;
-}
-
-.send-message-btn{
-  position: absolute;
-  right: 10px;
-  font-size: 25px;
-  color: #9b3f34;
-  cursor: pointer;
-  border: none;
-  background-color: transparent;
-  margin-top: 5px;
-}
-
-.send-emoji-btn{
-  position: absolute;
-  right: 50px;
-  font-size: 25px;
-  color: #7f3f38;
-  cursor: pointer;
-  border: none;
-  background-color: transparent;
-  margin-top: 5px;
-}
-
-.send-image-btn{
-  position: absolute;
-  right: 80px;
-  font-size: 25px;
-  color: #a14a40;
-  cursor: pointer;
-  border: none;
-  background-color: transparent;
-  margin-top: 5px;
-}
-
-/*****************************************************
-***********CUSTOM SCROLLBAR FOR CHATAREA**************
-******************************************************/
-.main-chat-area::-webkit-scrollbar {
-  width: 5px;
-}
-
-/* Track */
-.main-chat-area::-webkit-scrollbar-track {
-  box-shadow: inset 0 0 2px rgb(116, 6, 6); 
-  border-radius: 10px;
-}
-
-/* Handle */
-.main-chat-area::-webkit-scrollbar-thumb {
-  background: #c01f0d; 
-  border-radius: 10px;
-}
-
-/* Handle on hover */
-.main-chat-area::-webkit-scrollbar-thumb:hover {
-  background: #e74c3c; 
-}
-
-/*******************************************************
-***************CSS FOR CHAT MESSAGES********************
-********************************************************/
-.message-container{
-    display: flex;
-}
-.send-message, .received-message{
-    padding: 10px 20px;
-    margin-top: 5px;
-    border-radius: 10px;
-    font-size: 14px;
-    width: fit-content;
-}
-
-.send-message{ 
-    background-color: #854626;
-    color: rgb(197, 180, 180);
-    margin-left: 100px;
-    border-top-right-radius: 0px;
-}
-
-.received-message{ 
-    background-color: #a75555;
-    color: #28282B;
-    margin-right: 100px;
-    border-bottom-left-radius: 0px;
-}
-.message-timestamp{
-  width: fit-content;
-  font-size: 13px;
-}
-.last-message-timestamp{
-  font-size: 13px;
-}
-
-/*****************************************************
-************MEDIA QUERY FOR USER LIST*****************
-******************************************************/
-
-@media only screen and (max-width: 1000px) {
-  .filter-user-details, .last-message-timestamp {
-    display: none;
-  }
-  .user-search-area, .unread-message-counter {
-      display: none;
-  }
-  .app-sidebar{
-      width: 15%;
-  }
-  .app-chat-area{
-      width: 85%
-  }
-}
-
-
-.unread-message-counter{
+.unread-message-counter {
   text-align: center;
   float: right;
   font-size: 13px;
@@ -519,18 +402,209 @@ i{
   color: white;
 }
 
-
-.typing-indicator{
+.last-message-timestamp {
   font-size: 13px;
-  color: grey;
 }
 
+/*******************************************************
+*************CSS STYLES FOR CHAT AREA**************
+********************************************************/
+.app-chat-area {
+  background-color: rgba(134, 116, 116, 0.16);
+  width: 70%;
+  padding: 20px 30px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  height: 85vh;
+}
+
+/*******************************************************
+*************CSS STYLES FOR CHAT AREA HEADER************
+********************************************************/
+.app-chat-area-header {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  background: #a8adb304;
+  border-bottom: 1px solid #af3d3d;
+  font-weight: 600;
+  font-size: 16px;
+  min-height: 60px;
+  margin-bottom: 20px;
+  color:rgb(172, 93, 48)
+}
+
+.app-chat-area-header span {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/*******************************************************
+********CSS STYLES FOR CHAT AREA & CHAT INPUT***********
+********************************************************/
+.main-chat-area {
+  flex: 1;
+  overflow-y: scroll;
+  padding: 10px 20px;
+  background: #595c6100;
+}
+
+.send-message-div {
+  position: relative;
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px;
+  background: rgba(107, 98, 98, 0);
+  border-top: 1px solid #e0e0e0;
+}
+
+.send-message-input {
+  width: 100%;
+  height: 40px;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 25px;
+  color: #c79427;
+  outline: none;
+  font-size: 14px;
+  background: #76797c;
+}
+
+.send-message-input:focus {
+  border-color: #007bff;
+  background: white;
+}
+
+.send-message-btn,
+.send-emoji-btn,
+.send-image-btn {
+  background: none;
+  border: none;
+  font-size: 25px;
+  color: #7f3f38;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.send-message-btn {
+  color: #007bff;
+}
+
+.send-message-btn:hover,
+.send-emoji-btn:hover,
+.send-image-btn:hover {
+  background: #f8f9fa;
+}
+
+.send-message-btn:hover {
+  background: #6e767c;
+}
+
+/*****************************************************
+***********CUSTOM SCROLLBAR FOR CHATAREA**************
+******************************************************/
+.main-chat-area::-webkit-scrollbar {
+  width: 5px;
+}
+
+.main-chat-area::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 2px rgb(116, 6, 6);
+  border-radius: 10px;
+}
+
+.main-chat-area::-webkit-scrollbar-thumb {
+  background: #c01f0d;
+  border-radius: 10px;
+}
+
+.main-chat-area::-webkit-scrollbar-thumb:hover {
+  background: #e74c3c;
+}
+
+.sidebar-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: #793e37;
+  border-radius: 10px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: #9b4b43;
+}
+
+/*******************************************************
+***************CSS FOR CHAT MESSAGES********************
+********************************************************/
+.message-container {
+  display: flex;
+  margin-bottom: 8px;
+}
+
+.send-message,
+.received-message {
+  padding: 10px 20px;
+  margin-top: 5px;
+  border-radius: 10px;
+  font-size: 14px;
+  width: fit-content;
+  max-width: 70%;
+  word-wrap: break-word;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.send-message {
+  background-color: #854626;
+  color: rgb(197, 180, 180);
+  margin-left: 100px;
+  border-top-right-radius: 0px;
+}
+
+.received-message {
+  background-color: #a75555;
+  color: #28282B;
+  margin-right: 100px;
+  border-bottom-left-radius: 0px;
+  border: 1px solid #e0e0e0;
+}
+
+.message-timestamp {
+  width: fit-content;
+  font-size: 13px;
+  color: #999;
+  margin-top: 4px;
+  padding: 0 8px;
+}
+
+.typing-indicator {
+  font-size: 13px;
+  color: grey;
+  padding: 8px 15px;
+  font-style: italic;
+}
 
 /*****************************************************
 *************CSS STYLES FOR PROFILE PAGE**************
 ******************************************************/
-
-.profile-page-container{
+.profile-page-container {
   display: flex;
   width: 80%;
   color: #28282B;
@@ -539,16 +613,20 @@ i{
   border-radius: 10px;
   box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
-.profile-pic-container{
+
+.profile-pic-container {
   width: 30%;
   display: flex;
   justify-content: center;
 }
-.profile-info-container{
+
+.profile-info-container {
   width: 70%;
   padding: 30px 10px;
 }
-.user-profile-pic-upload, .user-default-profile-avatar{
+
+.user-profile-pic-upload,
+.user-default-profile-avatar {
   width: 240px;
   height: 240px;
   border-radius: 50%;
@@ -561,12 +639,13 @@ i{
   line-height: 240px;
 }
 
-.user-profile-name{
+.user-profile-name {
   padding: 10px 0px;
   border-bottom: #cdcdcd 1.5px solid;
   margin-bottom: 30px;
 }
-.select-profile-pic-container{
+
+.select-profile-pic-container {
   padding: 30px 0px;
 }
 
@@ -596,54 +675,63 @@ input[type="file"]::file-selector-button:active {
   color: #28282B;
 }
 
-.logout-button{
+.logout-button {
   background-color: transparent;
-  color:#e74c3c ;
+  color: #e74c3c;
   border: none;
   font-size: 18px;
   cursor: pointer;
 }
+
 /*******************************************************
 *************CSS FOR GROUP CHAT MODAL******************
 ********************************************************/
-
-/* Group Chat Header Button */
 .users-list-header {
   display: flex;
   justify-content: flex-end;
   margin-bottom: 15px;
+  padding: 15px;
+  border-bottom: 1px solid #e0e0e0;
+
 }
 
 .start-group-btn {
-  padding: 8px 12px;
-  background-color: #705f5d;
-  color: rgb(187, 76, 42);
+  padding: 12px;
+  background-color: #b1b7bc23;
+  color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s;
+  width: 100%;
 }
 
-.start-group-btn:hover {
-  background-color: #c0392b;
+.start-group-btn:hover:not(:disabled) {
+  background-color: #0056b3;
 }
 
-/* Modal Overlay */
+.start-group-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 .group-modal {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0,0,0,0.6);
+  background-color: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  padding: 20px;
 }
 
-/* Modal Content Box */
 .group-modal-content {
   width: 400px;
   background-color: white;
@@ -654,9 +742,9 @@ input[type="file"]::file-selector-button:active {
   display: flex;
   flex-direction: column;
   gap: 15px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 
-/* Modal Title */
 .group-modal-content h3 {
   font-size: 20px;
   font-weight: bold;
@@ -665,18 +753,20 @@ input[type="file"]::file-selector-button:active {
   margin-bottom: 10px;
 }
 
-/* Group Name Input */
 .group-name-input {
   width: 100%;
-  padding: 10px 15px;
-  border-radius: 5px;
+  padding: 12px;
   border: 1px solid #ddd;
+  border-radius: 8px;
   outline: none;
   font-size: 14px;
   margin-bottom: 10px;
 }
 
-/* Group Users List */
+.group-name-input:focus {
+  border-color: #007bff;
+}
+
 .group-users-list {
   display: flex;
   flex-wrap: wrap;
@@ -688,14 +778,18 @@ input[type="file"]::file-selector-button:active {
   border-radius: 5px;
 }
 
-/* Individual User Box */
 .group-user {
-  padding: 6px 10px;
+  padding: 12px;
   border-radius: 5px;
   background-color: #efefef;
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s ease;
+  border-bottom: 1px solid #f8f9fa;
+}
+
+.group-user:last-child {
+  border-bottom: none;
 }
 
 .group-user:hover {
@@ -707,63 +801,237 @@ input[type="file"]::file-selector-button:active {
   background-color: #e74c3c;
   color: white;
   font-weight: bold;
+  border-left: 3px solid #007bff;
 }
 
-/* Modal Action Buttons */
 .group-modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+  margin-top: 20px;
 }
 
 .cancel-btn,
 .create-btn {
-  padding: 8px 12px;
-  border-radius: 5px;
-  font-size: 14px;
-  cursor: pointer;
+  padding: 10px 20px;
   border: none;
-  transition: all 0.2s ease;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
 .cancel-btn {
-  background-color: #ccc;
-  color: #28282b;
-}
-
-.cancel-btn:hover {
-  background-color: #b0b0b0;
-}
-
-.create-btn {
-  background-color: #e74c3c;
+  background-color: #6c757d;
   color: white;
 }
 
-.create-btn:hover {
-  background-color: #c0392b;
+.cancel-btn:hover:not(:disabled) {
+  background-color: #5a6268;
 }
 
-/* Scrollbar inside modal for user list */
+.create-btn {
+  background-color: #007bff;
+  color: white;
+}
+
+.create-btn:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.cancel-btn:disabled,
+.create-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .group-users-list::-webkit-scrollbar {
   width: 5px;
 }
 
 .group-users-list::-webkit-scrollbar-track {
-  background: #f1f1f1; 
+  background: #f1f1f1;
   border-radius: 10px;
 }
 
 .group-users-list::-webkit-scrollbar-thumb {
-  background: #e74c3c; 
+  background: #e74c3c;
   border-radius: 10px;
 }
 
 .group-users-list::-webkit-scrollbar-thumb:hover {
-  background: #c0392b; 
+  background: #c0392b;
 }
 
-/* Responsive */
+/*******************************************************
+*******************RESPONSIVE STYLES********************
+********************************************************/
+
+/* Loading States */
+.users-list-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: #666;
+}
+
+.main-content.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: calc(100vh - 60px);
+  color: #666;
+}
+
+.no-users-found {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-style: italic;
+}
+
+/* Mobile Styles (768px and below) */
+@media (max-width: 768px) {
+  .home-page {
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .main-content {
+    display: flex;
+    height: calc(100vh - 60px);
+    position: relative;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  .app-sidebar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(122, 118, 118, 0);
+    z-index: 10;
+    padding: 0;
+  }
+
+  .app-chat-area {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(116, 112, 112, 0);
+    z-index: 20;
+    padding: 0;
+    border-radius: 0;
+  }
+
+  .app-chat-area-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    min-height: 60px;
+  }
+
+  .back-button {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 8px;
+    color: #a36333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .back-button:hover {
+    background: #75777900;
+  }
+
+  .mobile-empty-state {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #82868a;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .empty-state-content h3 {
+    color: #333;
+    margin-bottom: 10px;
+  }
+
+  .empty-state-content p {
+    color: #666;
+  }
+
+  .main-chat-area {
+    height: calc(100% - 120px) !important;
+  }
+
+  .user-search-area {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: #706d6900;
+  }
+}
+
+/* Desktop Styles (769px and above) */
+@media (min-width: 769px) {
+  .main-content {
+    display: flex;
+    height: calc(100vh - 60px);
+  }
+
+  .app-sidebar {
+    width: 350px;
+    border-right: 1px solid #e0e0e0;
+  }
+
+  .app-chat-area {
+    flex: 1;
+  }
+
+  .back-button {
+    display: none;
+  }
+
+  .mobile-empty-state {
+    display: none;
+  }
+}
+
+/* Tablet Styles (769px to 1000px) */
+@media only screen and (max-width: 1000px) and (min-width: 769px) {
+  .filter-user-details,
+  .last-message-timestamp {
+    display: none;
+  }
+
+  .app-sidebar {
+    width: 15%;
+  }
+
+  .app-chat-area {
+    width: 85%
+  }
+}
+
+/* Small Mobile Adjustments */
 @media only screen and (max-width: 500px) {
   .group-modal-content {
     width: 90%;
@@ -776,58 +1044,4 @@ input[type="file"]::file-selector-button:active {
   .start-group-btn {
     font-size: 12px;
   }
-}
-.sidebar-scroll {
-  max-height: 80vh;
-  overflow-y: auto;
-  padding-right: 5px;
-}
-
-/* Custom scrollbar */
-.sidebar-scroll::-webkit-scrollbar {
-  width: 6px;
-}
-
-.sidebar-scroll::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 10px;
-}
-
-.sidebar-scroll::-webkit-scrollbar-thumb {
-  background: #793e37;
-  border-radius: 10px;
-}
-
-.sidebar-scroll::-webkit-scrollbar-thumb:hover {
-  background: #9b4b43;
-}
-
-/* Add gap between users and round edges */
-.filtered-user,
-.selected-user {
-  border-bottom: none;          /* remove default border for cleaner look */
-  margin-bottom: 8px;           /* small gap between items */
-  border-radius: 10px;          /* curved edges */
-  padding: 10px 10px;
-  cursor: pointer;
-  display: flex;                /* keep layout */
-  align-items: center;          /* vertical alignment */
-  transition: all 0.2s ease;    /* smooth hover effect */
-}
-
-/* Background colors for normal and selected state */
-.filtered-user {
-  background-color: rgba(147, 137, 137, 0.409);
-  color: #cb6549;
-}
-
-.selected-user {
-  background-color: #8f7d7d42;
-  color: rgb(56, 184, 77);
-}
-
-/* Optional hover effect */
-.filtered-user:hover {
-  background-color: #805555;
-  color: #fff;
 }

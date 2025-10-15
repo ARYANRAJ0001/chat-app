@@ -10,15 +10,25 @@ function UsersList({ searchKey, onlineUser }) {
   const { allUsers, allChats, user: currentUser, selectedChat } = useSelector(state => state.userReducer);
   const dispatch = useDispatch();
 
+  // Add loading state and null checks
+  const [loading, setLoading] = useState(false);
+
   // ---------- SINGLE CHAT ----------
   const startNewChat = async (otherUserId) => {
+    if (!currentUser) {
+      toast.error("User not authenticated");
+      return;
+    }
+
     try {
       dispatch(showLoader());
+      setLoading(true);
       const response = await createNewChat({
         members: [currentUser._id, otherUserId],
         isGroupChat: false
       });
       dispatch(hideLoader());
+      setLoading(false);
 
       if (response.success) {
         toast.success(response.message);
@@ -29,6 +39,7 @@ function UsersList({ searchKey, onlineUser }) {
     } catch (error) {
       toast.error(error.message);
       dispatch(hideLoader());
+      setLoading(false);
     }
   };
 
@@ -42,6 +53,11 @@ function UsersList({ searchKey, onlineUser }) {
   };
 
   const createGroup = async () => {
+    if (!currentUser) {
+      toast.error("User not authenticated");
+      return;
+    }
+
     if (selectedUsers.length < 2) {
       toast.error("Select at least 2 users for a group chat!");
       return;
@@ -53,12 +69,14 @@ function UsersList({ searchKey, onlineUser }) {
 
     try {
       dispatch(showLoader());
+      setLoading(true);
       const response = await createNewChat({
         members: [currentUser._id, ...selectedUsers],
         isGroupChat: true,
         groupName
       });
       dispatch(hideLoader());
+      setLoading(false);
 
       if (response.success) {
         toast.success("Group created successfully!");
@@ -73,14 +91,15 @@ function UsersList({ searchKey, onlineUser }) {
     } catch (error) {
       toast.error(error.message);
       dispatch(hideLoader());
+      setLoading(false);
     }
   };
 
   // ---------- HELPERS ----------
   const isSelectedChat = (chatOrUser) => {
-    if (!selectedChat) return false;
+    if (!selectedChat || !chatOrUser) return false;
     if (chatOrUser.members) return selectedChat._id === chatOrUser._id;
-    return selectedChat.members.map(m => m._id).includes(chatOrUser._id);
+    return selectedChat.members?.map(m => m._id).includes(chatOrUser._id);
   };
 
   const getLastMessageTimeStamp = (chat) => {
@@ -89,56 +108,76 @@ function UsersList({ searchKey, onlineUser }) {
 
   const getLastMessageText = (chat) => {
     if (!chat || !chat.lastMessage) return "";
-    const prefix = chat.lastMessage.sender === currentUser._id ? "You: " : "";
+    const prefix = chat.lastMessage.sender === currentUser?._id ? "You: " : "";
     return prefix + chat.lastMessage.text.substring(0, 25);
   };
 
   const getUnreadMessageCount = (chat) => {
-    if (chat && chat.unreadMessageCount && chat.lastMessage?.sender !== currentUser._id) {
+    if (chat && chat.unreadMessageCount && chat.lastMessage?.sender !== currentUser?._id) {
       return <div className="unread-message-counter">{chat.unreadMessageCount}</div>;
     }
     return null;
   };
 
   const formatName = (user) => {
-    const fname = user.firstname?.charAt(0).toUpperCase() + user.firstname?.slice(1).toLowerCase();
-    const lname = user.lastname?.charAt(0).toUpperCase() + user.lastname?.slice(1).toLowerCase();
-    return `${fname} ${lname}`;
+    if (!user) return "Unknown User";
+    const fname = user.firstname?.charAt(0).toUpperCase() + user.firstname?.slice(1).toLowerCase() || '';
+    const lname = user.lastname?.charAt(0).toUpperCase() + user.lastname?.slice(1).toLowerCase() || '';
+    return `${fname} ${lname}`.trim();
   };
 
-  // ---------- FILTER USERS BASED ON SEARCH ----------
-  const getUsersToDisplay = () => {
-    let users = allUsers.filter(u => u._id !== currentUser._id);
-    if (searchKey) {
-      users = users.filter(user =>
-        user.firstname?.toLowerCase().includes(searchKey.toLowerCase()) ||
-        user.lastname?.toLowerCase().includes(searchKey.toLowerCase())
-      );
-    }
-    return users;
-  };
+ const getUsersToDisplay = () => {
+  if (!currentUser || !currentUser._id || !allUsers) return [];
+  
+  let users = allUsers.filter(u => u && u._id !== currentUser._id);
+  if (searchKey) {
+    users = users.filter(user =>
+      user?.firstname?.toLowerCase().includes(searchKey.toLowerCase()) ||
+      user?.lastname?.toLowerCase().includes(searchKey.toLowerCase())
+    );
+  }
+  return users;
+};
+
+
+  // Show loading state
+  if (!currentUser) {
+    return (
+      <div className="users-list-loading">
+        <div>Loading user data...</div>
+      </div>
+    );
+  }
 
   // ---------- UI ----------
   return (
     <>
       <div className="users-list-header">
-        <button className="start-group-btn" onClick={() => setShowGroupModal(true)}>Create Group</button>
+        <button 
+          className="start-group-btn" 
+          onClick={() => setShowGroupModal(true)}
+          disabled={loading}
+        >
+          {loading ? "Creating..." : "Create Group"}
+        </button>
       </div>
 
       <div className="sidebar-scroll">
         {/* GROUP CHATS */}
-        {allChats.filter(chat => chat.isGroupChat).map(chat => (
+        {allChats?.filter(chat => chat?.isGroupChat).map(chat => (
           <div
             key={chat._id}
             className={isSelectedChat(chat) ? "selected-user" : "filtered-user"}
             onClick={() => dispatch(setSelectedChat(chat))}
           >
             <div className="filter-user-display">
-              <div className="user-default-avatar">{chat.groupName.charAt(0).toUpperCase()}</div>
+              <div className="user-default-avatar">
+                {chat.groupName?.charAt(0).toUpperCase()}
+              </div>
               <div className="filter-user-details">
                 <div className="user-display-name">{chat.groupName}</div>
                 <div className="user-display-email">
-                  {chat.lastMessage ? getLastMessageText(chat) : `Members: ${chat.members.map(m => m.firstname).join(", ")}`}
+                  {chat.lastMessage ? getLastMessageText(chat) : `Members: ${chat.members?.map(m => m.firstname).join(", ")}`}
                 </div>
               </div>
               <div>
@@ -151,8 +190,8 @@ function UsersList({ searchKey, onlineUser }) {
 
         {/* SINGLE USERS */}
         {getUsersToDisplay().map(user => {
-          const chat = allChats.find(c =>
-            !c.isGroupChat && c.members.map(m => m._id).includes(user._id)
+          const chat = allChats?.find(c =>
+            !c.isGroupChat && c.members?.map(m => m._id).includes(user._id)
           );
 
           return (
@@ -167,14 +206,14 @@ function UsersList({ searchKey, onlineUser }) {
                     src={user.profilePic}
                     alt="Profile Pic"
                     className="user-profile-image"
-                    style={onlineUser.includes(user._id) ? { border: '#82e0aa 3px solid' } : {}}
+                    style={onlineUser?.includes(user._id) ? { border: '#82e0aa 3px solid' } : {}}
                   />
                 ) : (
                   <div
                     className="user-default-avatar"
-                    style={onlineUser.includes(user._id) ? { border: '#82e0aa 3px solid' } : {}}
+                    style={onlineUser?.includes(user._id) ? { border: '#82e0aa 3px solid' } : {}}
                   >
-                    {user.firstname.charAt(0).toUpperCase() + user.lastname.charAt(0).toUpperCase()}
+                    {user.firstname?.charAt(0).toUpperCase()}{user.lastname?.charAt(0).toUpperCase()}
                   </div>
                 )}
                 <div className="filter-user-details">
@@ -189,6 +228,13 @@ function UsersList({ searchKey, onlineUser }) {
             </div>
           );
         })}
+
+        {/* No users found message */}
+        {getUsersToDisplay().length === 0 && allChats?.filter(chat => chat?.isGroupChat).length === 0 && (
+          <div className="no-users-found">
+            No users or chats found.
+          </div>
+        )}
       </div>
 
       {/* ---------- GROUP MODAL ---------- */}
@@ -215,8 +261,20 @@ function UsersList({ searchKey, onlineUser }) {
               ))}
             </div>
             <div className="group-modal-actions">
-              <button className="cancel-btn" onClick={() => setShowGroupModal(false)}>Cancel</button>
-              <button className="create-btn" onClick={createGroup}>Create</button>
+              <button 
+                className="cancel-btn" 
+                onClick={() => setShowGroupModal(false)}
+                disabled={loading}
+              >
+                Cancel
+              </button>
+              <button 
+                className="create-btn" 
+                onClick={createGroup}
+                disabled={loading}
+              >
+                {loading ? "Creating..." : "Create"}
+              </button>
             </div>
           </div>
         </div>

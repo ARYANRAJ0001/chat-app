@@ -8,14 +8,13 @@ function Sidebar({ socket, onlineUser }){
         <div className="app-sidebar">
             <Search 
                 searchKey={searchKey} 
-                setSearchKey={setSearchKey}>               
-            </Search>
+                setSearchKey={setSearchKey} 
+            />
             <UsersList 
                 searchKey={searchKey} 
                 socket={socket}
                 onlineUser={onlineUser}
-            >
-            </UsersList>
+            />
         </div>
     )
 }

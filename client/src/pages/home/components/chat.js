@@ -1,4 +1,3 @@
-
 import { useDispatch, useSelector } from "react-redux";
 import { createNewMessage, getAllMessages } from "../../../apiCalls/message";
 import { hideLoader, showLoader } from "../../../redux/loaderSlice";
@@ -10,10 +9,10 @@ import store from './../../../redux/store';
 import { setAllChats, setSelectedChat } from "../../../redux/usersSlice";
 import EmojiPicker from "emoji-picker-react";
 
-function ChatArea({ socket }){
+function ChatArea({ socket, onBack, isMobileView }){
     const dispatch = useDispatch();
     const { selectedChat, user, allChats } = useSelector(state => state.userReducer);
-    const selectedUser = selectedChat.members.find( u => u._id !== user._id);
+    const selectedUser = selectedChat?.members?.find( u => u._id !== user._id);
     const [message, setMessage] = useState('');
     const [allMessages, setAllMessages] = useState([]);
     const [isTyping, setIsTyping] = useState(false);
@@ -97,10 +96,19 @@ function ChatArea({ socket }){
     }
 
     function formatName(user){
-        let fname = user.firstname.at(0).toUpperCase() + user.firstname.slice(1).toLowerCase();
-        let lname = user.lastname.at(0).toUpperCase() + user.lastname.slice(1).toLowerCase();
+        if (!user) return 'Unknown User';
+        let fname = user.firstname?.charAt(0).toUpperCase() + user.firstname?.slice(1).toLowerCase();
+        let lname = user.lastname?.charAt(0).toUpperCase() + user.lastname?.slice(1).toLowerCase();
         return fname + ' ' + lname;
     }
+
+    const getChatName = () => {
+        if (selectedChat.isGroupChat) {
+            return selectedChat.groupName;
+        } else {
+            return formatName(selectedUser);
+        }
+    };
 
     const sendImage = async (e) => {
         const file = e.target.files[0];
@@ -113,18 +121,20 @@ function ChatArea({ socket }){
     }
 
     useEffect(() => {
-        getMessages();
-        if(selectedChat?.lastMessage?.sender !== user._id){
-         clearUnreadMessages();
+        if (selectedChat) {
+            getMessages();
+            if(selectedChat?.lastMessage?.sender !== user._id){
+             clearUnreadMessages();
+            }
         }
 
         socket.off('receive-message').on('receive-message', (message) => {
             const selectedChat = store.getState().userReducer.selectedChat;
-            if(selectedChat._id === message.chatId){
+            if(selectedChat?._id === message.chatId){
                 setAllMessages(prevmsg => [...prevmsg, message]);
             }
 
-            if(selectedChat._id === message.chatId && message.sender !== user._id){
+            if(selectedChat?._id === message.chatId && message.sender !== user._id){
                 clearUnreadMessages();
             }
         })
@@ -133,8 +143,7 @@ function ChatArea({ socket }){
             const selectedChat = store.getState().userReducer.selectedChat;
             const allChats = store.getState().userReducer.allChats;
 
-            if(selectedChat._id === data.chatId){
-                //UPDATING UNREAD MESSAGE COUNT IN CHAT OBJECT
+            if(selectedChat?._id === data.chatId){
                 const updatedChats = allChats.map(chat => {
                     if(chat._id === data.chatId){
                         return { ...chat, unreadMessageCount: 0}
@@ -143,7 +152,6 @@ function ChatArea({ socket }){
                 })
                 dispatch(setAllChats(updatedChats));
 
-                //UPDATING READ PROPRTY IN MESSAGE OBJECT
                 setAllMessages(prevMsgs => {
                     return prevMsgs.map(msg => {
                         return {...msg, read: true}
@@ -154,7 +162,7 @@ function ChatArea({ socket }){
 
         socket.on('started-typing', (data) => {
             setData(data);
-            if(selectedChat._id === data.chatId && data.sender !== user._id){
+            if(selectedChat?._id === data.chatId && data.sender !== user._id){
                 setIsTyping(true);
                 setTimeout(() => {
                     setIsTyping(false);
@@ -165,91 +173,105 @@ function ChatArea({ socket }){
 
     useEffect(() => {
         const msgContainer = document.getElementById('main-chat-area');
-        msgContainer.scrollTop = msgContainer.scrollHeight;
+        if (msgContainer) {
+            msgContainer.scrollTop = msgContainer.scrollHeight;
+        }
     }, [allMessages, isTyping])
 
-    return <>
-            {selectedChat && <div class="app-chat-area">
-                    <div class="app-chat-area-header">
-                        { formatName(selectedUser)}
-                    </div>
+    if (!selectedChat) return null;
 
-                    <div className="main-chat-area" id="main-chat-area">
-                        { allMessages.map(msg => {
-                            const isCurrentUserSender = msg.sender === user._id;
+    return (
+        <div className="app-chat-area">
+            <div className="app-chat-area-header">
+                {isMobileView && (
+                    <button className="back-button" onClick={onBack}>
+                        <i className="fa fa-arrow-left"></i>
+                    </button>
+                )}
+                <span className="chat-header-name">{getChatName()}</span>
+            </div>
 
-                            return <div className="message-container" style={isCurrentUserSender ? {justifyContent: 'end'} : {justifyContent: 'start'}}>
-                                        <div>
-                                            <div className={isCurrentUserSender ? "send-message" : "received-message"}>
-                                                <div>{ msg.text }</div>
-                                                <div>{msg.image && <img src={msg.image} alt="image" height="120" width="120"></img>}</div>
-                                            </div>
-                                            <div className="message-timestamp" 
-                                                 style={isCurrentUserSender ? {float: 'right'} : {float: 'left'}}
-                                            >
-                                                { formatTime(msg.createdAt) } {isCurrentUserSender && msg.read && 
-                                                    <i className="fa fa-check-circle" aria-hidden="true" style={{color: '#e74c3c'}}></i>
-                                                }
-                                            </div>
-                                        </div>
-                                    </div>
-                        })}
-                        <div className="typing-indicator">
-                            {isTyping && selectedChat?.members.map(m => m._id).includes(data?.sender) && <i>typing...</i>}
+            <div className="main-chat-area" id="main-chat-area">
+                {allMessages.map((msg, index) => {
+                    const isCurrentUserSender = msg.sender === user._id;
+
+                    return (
+                        <div 
+                            className="message-container" 
+                            key={msg._id || index}
+                            style={isCurrentUserSender ? {justifyContent: 'flex-end'} : {justifyContent: 'flex-start'}}
+                        >
+                            <div className="message-wrapper">
+                                <div className={isCurrentUserSender ? "send-message" : "received-message"}>
+                                    {msg.text && <div className="message-text">{msg.text}</div>}
+                                    {msg.image && <img src={msg.image} alt="sent" className="message-image" />}
+                                </div>
+                                <div className="message-timestamp">
+                                    {formatTime(msg.createdAt)} 
+                                    {isCurrentUserSender && msg.read && 
+                                        <i className="fa fa-check-circle read-indicator" aria-hidden="true"></i>
+                                    }
+                                </div>
+                            </div>
                         </div>
-                    </div>
-
-                    {showEmojiPicker && 
-                        <div style={{width: '100%', display: 'flex', padding: '0px 20px', justifyContent: 'right'}}>
-                            <EmojiPicker style={{width: '300px', height: '400px'}} onEmojiClick={(e) => setMessage(message + e.emoji)}></EmojiPicker>
-                        </div>
-                    }
-                    <div className="send-message-div">
-                        <input type="text" 
-                            className="send-message-input" 
-                            placeholder="Type a message"
-                            value={message}
-                            onChange={ (e) => { 
-                                setMessage(e.target.value)
-                                socket.emit('user-typing', {
-                                    chatId: selectedChat._id,
-                                    members: selectedChat.members.map(m => m._id),
-                                    sender: user._id
-                                })
-                            } 
-                        }
-                        />
-                        
-                        <label for="file">
-                            <i className="fa fa-picture-o send-image-btn"></i>
-                            <input
-                                type="file"
-                                id="file"
-                                style={{display: 'none'}}
-                                accept="image/jpg,image/png,image/jpeg,image/gif"
-                                onChange={sendImage}
-                            >
-                            </input>
-                        </label>
-
-                        <button 
-                            className="fa fa-smile-o send-emoji-btn" 
-                            aria-hidden="true"
-                            onClick={ () => { setShowEmojiPicker(!showEmojiPicker)} }>
-                        </button>
-                        <button 
-                            className="fa fa-paper-plane send-message-btn" 
-                            aria-hidden="true"
-                            onClick={ () => sendMessage('') }>
-                        </button>
-                        
-                    </div>
-                    
+                    );
+                })}
+                <div className="typing-indicator">
+                    {isTyping && selectedChat?.members.map(m => m._id).includes(data?.sender) && <i>typing...</i>}
                 </div>
-                }
+            </div>
+
+            {showEmojiPicker && 
+                <div className="emoji-picker-container">
+                    <EmojiPicker 
+                        width={300} 
+                        height={400} 
+                        onEmojiClick={(e) => setMessage(message + e.emoji)}
+                    />
+                </div>
+            }
+            <div className="send-message-div">
+                <input 
+                    type="text" 
+                    className="send-message-input" 
+                    placeholder="Type a message"
+                    value={message}
+                    onChange={ (e) => { 
+                        setMessage(e.target.value)
+                        socket.emit('user-typing', {
+                            chatId: selectedChat._id,
+                            members: selectedChat.members.map(m => m._id),
+                            sender: user._id
+                        })
+                    }}
+                />
                 
-        </>
+                <label htmlFor="file" className="file-input-label">
+                    <i className="fa fa-picture-o send-image-btn"></i>
+                    <input
+                        type="file"
+                        id="file"
+                        className="file-input"
+                        accept="image/jpg,image/png,image/jpeg,image/gif"
+                        onChange={sendImage}
+                    />
+                </label>
+
+                <button 
+                    className="send-emoji-btn" 
+                    onClick={ () => { setShowEmojiPicker(!showEmojiPicker)} }
+                >
+                    <i className="fa fa-smile-o"></i>
+                </button>
+                <button 
+                    className="send-message-btn" 
+                    onClick={ () => sendMessage('') }
+                >
+                    <i className="fa fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    );
 }
 
-
-export default ChatArea;    
+export default ChatArea;
