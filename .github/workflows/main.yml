@@ -1,6 +1,7 @@
 name: Deploy Fullstack App on EC2
 
 on:
+  workflow_dispatch:    # allows manual trigger
   push:
     branches:
       - main
@@ -27,6 +28,14 @@ jobs:
             client/package-lock.json
 
       # ------------------------------
+      # INSTALL PM2 (Fix for missing pm2)
+      # ------------------------------
+      - name: Install PM2 globally
+        run: |
+          npm install -g pm2
+          pm2 update
+
+      # ------------------------------
       # BACKEND SETUP
       # ------------------------------
       - name: Install backend dependencies
@@ -42,7 +51,7 @@ jobs:
       - name: Start backend with PM2
         working-directory: ./server
         run: |
-          /home/ubuntu/.nvm/versions/node/v22.16.0/bin/pm2 restart backend || /home/ubuntu/.nvm/versions/node/v22.16.0/bin/pm2 start index.js --name backend
+          pm2 restart backend || pm2 start index.js --name backend
 
       # ------------------------------
       # FRONTEND SETUP
@@ -71,3 +80,4 @@ jobs:
         run: |
           sudo rm -rf /var/www/html/*
           sudo cp -r ./client/dist/* /var/www/html/
+
