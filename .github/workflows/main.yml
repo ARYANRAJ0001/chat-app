@@ -46,11 +46,11 @@ jobs:
           echo "${{ secrets.PROD_BACKEND_ENV }}" > config.env
 
       - name: Start backend with PM2
-        working-directory: ./server
         run: |
+          BACKEND_PATH="$GITHUB_WORKSPACE/server"
           # Start backend if not running, otherwise restart with updated env
-          npx pm2 start index.js --name backend --cwd ./ || \
-          npx pm2 restart backend --update-env
+          npx pm2 start $BACKEND_PATH/index.js --name backend --cwd $BACKEND_PATH || \
+          npx pm2 restart backend --update-env --cwd $BACKEND_PATH
 
       # ------------------------------
       # FRONTEND SETUP
@@ -78,4 +78,4 @@ jobs:
       - name: Deploy frontend to Nginx
         run: |
           sudo rm -rf /var/www/html/*
-          sudo cp -r ./client/build/* /var/www/html/
+          sudo cp -r $GITHUB_WORKSPACE/client/build/* /var/www/html/
