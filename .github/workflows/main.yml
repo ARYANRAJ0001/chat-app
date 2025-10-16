@@ -1,42 +1,73 @@
-name: Deploy Node Application
+name: Deploy Fullstack App on EC2
 
-on: 
-  workflow_dispatch:     # ✅ allows manual "Run workflow" trigger
+on:
   push:
     branches:
-      - mern-ec2-docker-ssl   # ✅ your deployment branch
+      - main
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Source
-        uses: actions/checkout@v4
-
-      - name: Login to Docker Hub
-        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Build Docker Image
-        run: docker build -t aryanraj0001/chat-app .
-
-      - name: Publish Image to Docker Hub
-        run: docker push aryanraj0001/chat-app:latest
-
   deploy:
-    needs: build
     runs-on: self-hosted
 
+    strategy:
+      matrix:
+        node-version: [22.x]
+
     steps:
-      - name: Pull Image from Docker Hub
-        run: docker pull aryanraj0001/chat-app:latest
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Delete Old Container
-        run: docker rm -f chat-app-container || true
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: |
+            server/package-lock.json
+            client/package-lock.json
 
-      - name: Run Docker Container
+      # ------------------------------
+      # BACKEND SETUP
+      # ------------------------------
+      - name: Install backend dependencies
+        working-directory: ./server
+        run: npm install
+
+      - name: Create backend .env file
+        working-directory: ./server
         run: |
-          docker run -d -p 4000:4000 \
-          --name chat-app-container \
-          -e MONGO_PASSWORD='${{ secrets.MONGO_PASSWORD }}' \
-          aryanraj0001/chat-app:latest
+          touch .env
+          echo "${{ secrets.PROD_BACKEND_ENV }}" > .env
+
+      - name: Start backend with PM2
+        working-directory: ./server
+        run: |
+          /home/ubuntu/.nvm/versions/node/v22.16.0/bin/pm2 restart backend || /home/ubuntu/.nvm/versions/node/v22.16.0/bin/pm2 start index.js --name backend
+
+      # ------------------------------
+      # FRONTEND SETUP
+      # ------------------------------
+      - name: Clean npm cache & remove existing dependencies
+        working-directory: ./client
+        run: |
+          rm -rf node_modules package-lock.json
+          npm cache clean --force
+
+      - name: Install frontend dependencies
+        working-directory: ./client
+        run: npm install
+
+      - name: Create frontend .env file
+        working-directory: ./client
+        run: |
+          touch .env
+          echo "${{ secrets.PROD_FRONTEND_ENV }}" > .env
+
+      - name: Build frontend
+        working-directory: ./client
+        run: npm run build
+
+      - name: Deploy frontend to Nginx
+        run: |
+          sudo rm -rf /var/www/html/*
+          sudo cp -r ./client/dist/* /var/www/html/
