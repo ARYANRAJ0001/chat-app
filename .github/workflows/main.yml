@@ -1,0 +1,75 @@
+name: Deploy Fullstack App on EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    strategy:
+      matrix:
+        node-version: [22.x]
+
+    steps:
+      # ------------------------------
+      # CHECKOUT CODE
+      # ------------------------------
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # ------------------------------
+      # SETUP NODE.JS
+      # ------------------------------
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: |
+            server/package-lock.json
+            client/package-lock.json
+
+      # ------------------------------
+      # BACKEND SETUP
+      # ------------------------------
+      - name: Install backend dependencies
+        working-directory: ./server
+        run: npm install
+
+      - name: Create backend config.env file
+        working-directory: ./server
+        run: |
+          touch config.env
+          echo "${{ secrets.PROD_BACKEND_ENV }}" > config.env
+
+      - name: Restart or start backend with PM2
+        working-directory: ./server
+        run: |
+          /home/ubuntu/.nvm/versions/node/v22.16.0/bin/pm2 restart backend || \
+          /home/ubuntu/.nvm/versions/node/v22.16.0/bin/pm2 start index.js --name backend
+
+      # ------------------------------
+      # FRONTEND SETUP
+      # ------------------------------
+      - name: Install frontend dependencies
+        working-directory: ./client
+        run: npm install
+
+      - name: Build frontend
+        working-directory: ./client
+        run: npm run build
+
+      - name: Copy frontend build to backend public folder
+        run: |
+          rm -rf server/public
+          mkdir -p server/public
+          cp -r client/build/* server/public/
+
+      # Optional: Restart backend again after frontend update
+      - name: Reload PM2 backend
+        working-directory: ./server
+        run: |
+          /home/ubuntu/.nvm/versions/node/v22.16.0/bin/pm2 reload backend
