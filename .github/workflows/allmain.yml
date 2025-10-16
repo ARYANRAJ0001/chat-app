@@ -1,0 +1,33 @@
+name: Deploy Chat App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-run:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install backend dependencies
+        run: |
+          cd server
+          npm install
+
+      - name: Install frontend dependencies & build
+        run: |
+          cd client
+          npm install
+          npm run build
+
+      - name: Copy frontend build to backend (optional)
+        run: |
+          cp -r client/build server/build
