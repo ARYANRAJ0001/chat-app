@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - mern-ec2-docker-ssl
-
 jobs:
   build:
     runs-on: ubuntu-latest
