@@ -1,10 +1,9 @@
-name: Deploy Fullstack App on EC2
+name: Deploy Fullstack Chat App on EC2
 
 on:
-  workflow_dispatch:    # allows manual trigger
   push:
     branches:
-      - main
+      - main  # Run only when code is pushed to main branch
 
 jobs:
   deploy:
@@ -15,9 +14,15 @@ jobs:
         node-version: [22.x]
 
     steps:
+      # ------------------------------
+      # CHECKOUT CODE
+      # ------------------------------
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # ------------------------------
+      # SETUP NODE
+      # ------------------------------
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
@@ -26,14 +31,6 @@ jobs:
           cache-dependency-path: |
             server/package-lock.json
             client/package-lock.json
-
-      # ------------------------------
-      # INSTALL PM2 (Fix for missing pm2)
-      # ------------------------------
-      - name: Install PM2 globally
-        run: |
-          npm install -g pm2
-          pm2 update
 
       # ------------------------------
       # BACKEND SETUP
@@ -51,7 +48,11 @@ jobs:
       - name: Start backend with PM2
         working-directory: ./server
         run: |
-          pm2 restart backend || pm2 start index.js --name backend
+          if ! command -v pm2 &> /dev/null; then
+            sudo npm install -g pm2
+          fi
+          pm2 restart backend || pm2 start server.js --name backend --update-env
+          pm2 save
 
       # ------------------------------
       # FRONTEND SETUP
@@ -59,7 +60,7 @@ jobs:
       - name: Clean npm cache & remove existing dependencies
         working-directory: ./client
         run: |
-          rm -rf node_modules package-lock.json
+          rm -rf node_modules package-lock.json dist
           npm cache clean --force
 
       - name: Install frontend dependencies
@@ -76,8 +77,17 @@ jobs:
         working-directory: ./client
         run: npm run build
 
+      # ------------------------------
+      # DEPLOY FRONTEND TO NGINX
+      # ------------------------------
       - name: Deploy frontend to Nginx
         run: |
           sudo rm -rf /var/www/html/*
           sudo cp -r ./client/dist/* /var/www/html/
+          sudo systemctl restart nginx
 
+      # ------------------------------
+      # DONE
+      # ------------------------------
+      - name: Deployment complete
+        run: echo "🚀 Chat App successfully deployed on EC2!"
