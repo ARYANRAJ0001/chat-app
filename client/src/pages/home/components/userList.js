@@ -13,6 +13,47 @@ function UsersList({ searchKey, onlineUser }) {
   // Add loading state and null checks
   const [loading, setLoading] = useState(false);
 
+  // ---------- SORTING LOGIC ----------
+  const sortChatsByLastMessage = (chats) => {
+    if (!chats || !Array.isArray(chats)) return [];
+    
+    return [...chats].sort((a, b) => {
+      const timeA = a.lastMessage ? new Date(a.lastMessage.createdAt).getTime() : new Date(a.createdAt || 0).getTime();
+      const timeB = b.lastMessage ? new Date(b.lastMessage.createdAt).getTime() : new Date(b.createdAt || 0).getTime();
+      return timeB - timeA; // Most recent first
+    });
+  };
+
+  // Get sorted group chats
+  const sortedGroupChats = sortChatsByLastMessage(allChats?.filter(chat => chat?.isGroupChat));
+
+  // Get sorted individual chats
+  const getSortedIndividualChats = () => {
+    if (!currentUser || !currentUser._id || !allUsers) return [];
+    
+    let users = allUsers.filter(u => u && u._id !== currentUser._id);
+    
+    if (searchKey) {
+      users = users.filter(user =>
+        user?.firstname?.toLowerCase().includes(searchKey.toLowerCase()) ||
+        user?.lastname?.toLowerCase().includes(searchKey.toLowerCase())
+      );
+    }
+
+    // Sort users by their chat's last message time
+    return users.sort((a, b) => {
+      const chatA = allChats?.find(c => !c.isGroupChat && c.members?.map(m => m._id).includes(a._id));
+      const chatB = allChats?.find(c => !c.isGroupChat && c.members?.map(m => m._id).includes(b._id));
+      
+      const timeA = chatA?.lastMessage ? new Date(chatA.lastMessage.createdAt).getTime() : 
+                   chatA ? new Date(chatA.createdAt || 0).getTime() : 0;
+      const timeB = chatB?.lastMessage ? new Date(chatB.lastMessage.createdAt).getTime() : 
+                   chatB ? new Date(chatB.createdAt || 0).getTime() : 0;
+      
+      return timeB - timeA; // Most recent first
+    });
+  };
+
   // ---------- SINGLE CHAT ----------
   const startNewChat = async (otherUserId) => {
     if (!currentUser) {
@@ -109,7 +150,7 @@ function UsersList({ searchKey, onlineUser }) {
   const getLastMessageText = (chat) => {
     if (!chat || !chat.lastMessage) return "";
     const prefix = chat.lastMessage.sender === currentUser?._id ? "You: " : "";
-    return prefix + chat.lastMessage.text.substring(0, 25);
+    return prefix + (chat.lastMessage.text || "").substring(0, 25);
   };
 
   const getUnreadMessageCount = (chat) => {
@@ -126,19 +167,10 @@ function UsersList({ searchKey, onlineUser }) {
     return `${fname} ${lname}`.trim();
   };
 
- const getUsersToDisplay = () => {
-  if (!currentUser || !currentUser._id || !allUsers) return [];
-  
-  let users = allUsers.filter(u => u && u._id !== currentUser._id);
-  if (searchKey) {
-    users = users.filter(user =>
-      user?.firstname?.toLowerCase().includes(searchKey.toLowerCase()) ||
-      user?.lastname?.toLowerCase().includes(searchKey.toLowerCase())
-    );
-  }
-  return users;
-};
-
+  const getUsersForGroupModal = () => {
+    if (!currentUser || !currentUser._id || !allUsers) return [];
+    return allUsers.filter(u => u && u._id !== currentUser._id);
+  };
 
   // Show loading state
   if (!currentUser) {
@@ -148,6 +180,8 @@ function UsersList({ searchKey, onlineUser }) {
       </div>
     );
   }
+
+  const sortedIndividualUsers = getSortedIndividualChats();
 
   // ---------- UI ----------
   return (
@@ -163,8 +197,8 @@ function UsersList({ searchKey, onlineUser }) {
       </div>
 
       <div className="sidebar-scroll">
-        {/* GROUP CHATS */}
-        {allChats?.filter(chat => chat?.isGroupChat).map(chat => (
+        {/* GROUP CHATS - SORTED */}
+        {sortedGroupChats.map(chat => (
           <div
             key={chat._id}
             className={isSelectedChat(chat) ? "selected-user" : "filtered-user"}
@@ -177,7 +211,7 @@ function UsersList({ searchKey, onlineUser }) {
               <div className="filter-user-details">
                 <div className="user-display-name">{chat.groupName}</div>
                 <div className="user-display-email">
-                  {chat.lastMessage ? getLastMessageText(chat) : `Members: ${chat.members?.map(m => m.firstname).join(", ")}`}
+                  {chat.lastMessage ? getLastMessageText(chat) : `Members: ${chat.members?.length || 0}`}
                 </div>
               </div>
               <div>
@@ -188,8 +222,8 @@ function UsersList({ searchKey, onlineUser }) {
           </div>
         ))}
 
-        {/* SINGLE USERS */}
-        {getUsersToDisplay().map(user => {
+        {/* INDIVIDUAL USERS - SORTED */}
+        {sortedIndividualUsers.map(user => {
           const chat = allChats?.find(c =>
             !c.isGroupChat && c.members?.map(m => m._id).includes(user._id)
           );
@@ -230,7 +264,7 @@ function UsersList({ searchKey, onlineUser }) {
         })}
 
         {/* No users found message */}
-        {getUsersToDisplay().length === 0 && allChats?.filter(chat => chat?.isGroupChat).length === 0 && (
+        {sortedGroupChats.length === 0 && sortedIndividualUsers.length === 0 && (
           <div className="no-users-found">
             No users or chats found.
           </div>
@@ -250,7 +284,7 @@ function UsersList({ searchKey, onlineUser }) {
               onChange={e => setGroupName(e.target.value)}
             />
             <div className="group-users-list">
-              {getUsersToDisplay().map(u => (
+              {getUsersForGroupModal().map(u => (
                 <div
                   key={u._id}
                   className={`group-user ${selectedUsers.includes(u._id) ? "selected" : ""}`}
