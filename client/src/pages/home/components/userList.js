@@ -4,113 +4,94 @@ import { useDispatch, useSelector } from "react-redux";
 import { createNewChat } from './../../../apiCalls/chat';
 import { hideLoader, showLoader } from "../../../redux/loaderSlice";
 import { setAllChats, setSelectedChat } from '../../../redux/usersSlice';
-import moment from "moment";
 
-function UsersList({ searchKey, onlineUser }) {
-  const { allUsers, allChats, user: currentUser, selectedChat } = useSelector(state => state.userReducer);
+function UsersList({ searchKey = "", onlineUser = [] }) {
+  const { allUsers = [], allChats = [], user: currentUser, selectedChat } = useSelector(state => state.userReducer);
   const dispatch = useDispatch();
-
-  // Add loading state and null checks
   const [loading, setLoading] = useState(false);
+  const [showGroupModal, setShowGroupModal] = useState(false);
+  const [groupName, setGroupName] = useState("");
+  const [selectedUsers, setSelectedUsers] = useState([]);
 
-  // ---------- SORTING LOGIC ----------
-  const sortChatsByLastMessage = (chats) => {
-    if (!chats || !Array.isArray(chats)) return [];
-    
-    return [...chats].sort((a, b) => {
-      const timeA = a.lastMessage ? new Date(a.lastMessage.createdAt).getTime() : new Date(a.createdAt || 0).getTime();
-      const timeB = b.lastMessage ? new Date(b.lastMessage.createdAt).getTime() : new Date(b.createdAt || 0).getTime();
-      return timeB - timeA; // Most recent first
-    });
-  };
+  // ---------- SORT GROUP CHATS ----------
+  const sortedGroupChats = (allChats?.filter(c => c?.isGroupChat) || []).sort((a, b) => {
+    const timeA = a.lastMessage ? new Date(a.lastMessage.createdAt).getTime() : new Date(a.createdAt || 0).getTime();
+    const timeB = b.lastMessage ? new Date(b.lastMessage.createdAt).getTime() : new Date(b.createdAt || 0).getTime();
+    return timeB - timeA;
+  });
 
-  // Get sorted group chats
-  const sortedGroupChats = sortChatsByLastMessage(allChats?.filter(chat => chat?.isGroupChat));
+  // ---------- SORT INDIVIDUAL USERS (ONLY CHATS YOU CREATED) ----------
+  const getSortedIndividualUsers = () => {
+  if (!currentUser || !allChats) return [];
 
-  // Get sorted individual chats
-  const getSortedIndividualChats = () => {
-    if (!currentUser || !currentUser._id || !allUsers) return [];
-    
-    let users = allUsers.filter(u => u && u._id !== currentUser._id);
-    
-    if (searchKey) {
-      users = users.filter(user =>
-        user?.firstname?.toLowerCase().includes(searchKey.toLowerCase()) ||
-        user?.lastname?.toLowerCase().includes(searchKey.toLowerCase())
-      );
-    }
+  // Filter chats that are NOT group chats and include currentUser
+  const individualChats = allChats.filter(c => !c.isGroupChat && c.members?.map(m => m._id).includes(currentUser._id));
 
-    // Sort users by their chat's last message time
-    return users.sort((a, b) => {
-      const chatA = allChats?.find(c => !c.isGroupChat && c.members?.map(m => m._id).includes(a._id));
-      const chatB = allChats?.find(c => !c.isGroupChat && c.members?.map(m => m._id).includes(b._id));
-      
-      const timeA = chatA?.lastMessage ? new Date(chatA.lastMessage.createdAt).getTime() : 
-                   chatA ? new Date(chatA.createdAt || 0).getTime() : 0;
-      const timeB = chatB?.lastMessage ? new Date(chatB.lastMessage.createdAt).getTime() : 
-                   chatB ? new Date(chatB.createdAt || 0).getTime() : 0;
-      
-      return timeB - timeA; // Most recent first
-    });
-  };
+  // Map to the other user in the chat
+  let usersFromChats = individualChats.map(c =>
+    c.members.find(m => m._id !== currentUser._id)
+  ).filter(Boolean);
 
-  // ---------- SINGLE CHAT ----------
+  // Remove duplicates
+  usersFromChats = Array.from(new Map(usersFromChats.map(u => [u._id, u])).values());
+
+  // If searchKey exists, include users from allUsers as well
+  if (searchKey?.trim()) {
+    const key = searchKey.toLowerCase();
+    const searchUsers = allUsers.filter(u =>
+      u._id !== currentUser._id &&
+      (
+        u.firstname?.toLowerCase().includes(key) ||
+        u.lastname?.toLowerCase().includes(key) ||
+        u.email?.toLowerCase().includes(key)
+      )
+    );
+    // Combine and remove duplicates
+    const combined = [...usersFromChats, ...searchUsers];
+    return Array.from(new Map(combined.map(u => [u._id, u])).values());
+  }
+
+  return usersFromChats;
+};
+
+
+  const sortedIndividualUsers = getSortedIndividualUsers();
+
+  // ---------- CHAT HANDLERS ----------
   const startNewChat = async (otherUserId) => {
-    if (!currentUser) {
-      toast.error("User not authenticated");
-      return;
-    }
-
+    if (!currentUser) return toast.error("User not authenticated");
     try {
-      dispatch(showLoader());
       setLoading(true);
-      const response = await createNewChat({
-        members: [currentUser._id, otherUserId],
-        isGroupChat: false
-      });
+      dispatch(showLoader());
+      const response = await createNewChat({ members: [currentUser._id, otherUserId], isGroupChat: false });
       dispatch(hideLoader());
       setLoading(false);
 
       if (response.success) {
-        toast.success(response.message);
+        toast.success(response.message || "Chat created!");
         const updatedChats = [...allChats, response.data];
         dispatch(setAllChats(updatedChats));
         dispatch(setSelectedChat(response.data));
       }
     } catch (error) {
-      toast.error(error.message);
       dispatch(hideLoader());
       setLoading(false);
+      toast.error(error.message || "Something went wrong!");
     }
   };
-
-  // ---------- GROUP CHAT ----------
-  const [showGroupModal, setShowGroupModal] = useState(false);
-  const [groupName, setGroupName] = useState("");
-  const [selectedUsers, setSelectedUsers] = useState([]);
 
   const toggleUserSelection = (userId) => {
     setSelectedUsers(prev => prev.includes(userId) ? prev.filter(id => id !== userId) : [...prev, userId]);
   };
 
   const createGroup = async () => {
-    if (!currentUser) {
-      toast.error("User not authenticated");
-      return;
-    }
-
-    if (selectedUsers.length < 2) {
-      toast.error("Select at least 2 users for a group chat!");
-      return;
-    }
-    if (!groupName.trim()) {
-      toast.error("Please enter a group name");
-      return;
-    }
+    if (!currentUser) return toast.error("User not authenticated");
+    if (!groupName.trim()) return toast.error("Enter a group name");
+    if (selectedUsers.length < 2) return toast.error("Select at least 2 users for a group chat");
 
     try {
-      dispatch(showLoader());
       setLoading(true);
+      dispatch(showLoader());
       const response = await createNewChat({
         members: [currentUser._id, ...selectedUsers],
         isGroupChat: true,
@@ -130,9 +111,9 @@ function UsersList({ searchKey, onlineUser }) {
         setSelectedUsers([]);
       }
     } catch (error) {
-      toast.error(error.message);
       dispatch(hideLoader());
       setLoading(false);
+      toast.error(error.message || "Failed to create group");
     }
   };
 
@@ -143,91 +124,49 @@ function UsersList({ searchKey, onlineUser }) {
     return selectedChat.members?.map(m => m._id).includes(chatOrUser._id);
   };
 
-  const getLastMessageTimeStamp = (chat) => {
-    return chat?.lastMessage ? moment(chat.lastMessage.createdAt).format('hh:mm A') : "";
-  };
-
-  const getLastMessageText = (chat) => {
-    if (!chat || !chat.lastMessage) return "";
-    const prefix = chat.lastMessage.sender === currentUser?._id ? "You: " : "";
-    return prefix + (chat.lastMessage.text || "").substring(0, 25);
-  };
-
-  const getUnreadMessageCount = (chat) => {
-    if (chat && chat.unreadMessageCount && chat.lastMessage?.sender !== currentUser?._id) {
-      return <div className="unread-message-counter">{chat.unreadMessageCount}</div>;
-    }
-    return null;
-  };
-
   const formatName = (user) => {
     if (!user) return "Unknown User";
-    const fname = user.firstname?.charAt(0).toUpperCase() + user.firstname?.slice(1).toLowerCase() || '';
-    const lname = user.lastname?.charAt(0).toUpperCase() + user.lastname?.slice(1).toLowerCase() || '';
+    const fname = user.firstname?.charAt(0).toUpperCase() + user.firstname?.slice(1).toLowerCase();
+    const lname = user.lastname?.charAt(0).toUpperCase() + user.lastname?.slice(1).toLowerCase();
     return `${fname} ${lname}`.trim();
   };
 
   const getUsersForGroupModal = () => {
-    if (!currentUser || !currentUser._id || !allUsers) return [];
     return allUsers.filter(u => u && u._id !== currentUser._id);
   };
 
-  // Show loading state
-  if (!currentUser) {
-    return (
-      <div className="users-list-loading">
-        <div>Loading user data...</div>
-      </div>
-    );
-  }
-
-  const sortedIndividualUsers = getSortedIndividualChats();
+  if (!currentUser) return <div className="users-list-loading">Loading user data...</div>;
 
   // ---------- UI ----------
   return (
     <>
       <div className="users-list-header">
-        <button 
-          className="start-group-btn" 
-          onClick={() => setShowGroupModal(true)}
-          disabled={loading}
-        >
+        <button className="start-group-btn" onClick={() => setShowGroupModal(true)} disabled={loading}>
           {loading ? "Creating..." : "Create Group"}
         </button>
       </div>
 
       <div className="sidebar-scroll">
-        {/* GROUP CHATS - SORTED */}
-        {sortedGroupChats.map(chat => (
+        {/* GROUP CHATS */}
+        {sortedGroupChats.length > 0 ? sortedGroupChats.map(chat => (
           <div
             key={chat._id}
             className={isSelectedChat(chat) ? "selected-user" : "filtered-user"}
             onClick={() => dispatch(setSelectedChat(chat))}
           >
             <div className="filter-user-display">
-              <div className="user-default-avatar">
-                {chat.groupName?.charAt(0).toUpperCase()}
-              </div>
+              <div className="user-default-avatar">{chat.groupName?.charAt(0)?.toUpperCase()}</div>
               <div className="filter-user-details">
                 <div className="user-display-name">{chat.groupName}</div>
-                <div className="user-display-email">
-                  {chat.lastMessage ? getLastMessageText(chat) : `Members: ${chat.members?.length || 0}`}
-                </div>
-              </div>
-              <div>
-                {getUnreadMessageCount(chat)}
-                <div className="last-message-timestamp">{getLastMessageTimeStamp(chat)}</div>
+                <div className="user-display-email">{chat.lastMessage ? chat.lastMessage.text : `Members: ${chat.members?.length}`}</div>
               </div>
             </div>
           </div>
-        ))}
+        )) : null}
 
-        {/* INDIVIDUAL USERS - SORTED */}
-        {sortedIndividualUsers.map(user => {
-          const chat = allChats?.find(c =>
-            !c.isGroupChat && c.members?.map(m => m._id).includes(user._id)
-          );
-
+        {/* INDIVIDUAL USERS */}
+        {sortedIndividualUsers.length > 0 ? sortedIndividualUsers.map(user => {
+          const chat = allChats.find(c => !c.isGroupChat && c.members?.map(m => m._id).includes(user._id));
           return (
             <div
               key={user._id}
@@ -240,13 +179,10 @@ function UsersList({ searchKey, onlineUser }) {
                     src={user.profilePic}
                     alt="Profile Pic"
                     className="user-profile-image"
-                    style={onlineUser?.includes(user._id) ? { border: '#82e0aa 3px solid' } : {}}
+                    style={onlineUser.includes(user._id) ? { border: '#82e0aa 3px solid' } : {}}
                   />
                 ) : (
-                  <div
-                    className="user-default-avatar"
-                    style={onlineUser?.includes(user._id) ? { border: '#82e0aa 3px solid' } : {}}
-                  >
+                  <div className="user-default-avatar" style={onlineUser.includes(user._id) ? { border: '#82e0aa 3px solid' } : {}}>
                     {user.firstname?.charAt(0).toUpperCase()}{user.lastname?.charAt(0).toUpperCase()}
                   </div>
                 )}
@@ -254,24 +190,17 @@ function UsersList({ searchKey, onlineUser }) {
                   <div className="user-display-name">{formatName(user)}</div>
                   <div className="user-display-email">{user.email}</div>
                 </div>
-                <div>
-                  {getUnreadMessageCount(chat)}
-                  <div className="last-message-timestamp">{chat ? getLastMessageTimeStamp(chat) : ""}</div>
-                </div>
               </div>
             </div>
-          );
-        })}
+          )
+        }) : null}
 
-        {/* No users found message */}
-        {sortedGroupChats.length === 0 && sortedIndividualUsers.length === 0 && (
-          <div className="no-users-found">
-            No users or chats found.
-          </div>
+        {(sortedGroupChats.length === 0 && sortedIndividualUsers.length === 0) && (
+          <div className="no-users-found">No users or chats found.</div>
         )}
       </div>
 
-      {/* ---------- GROUP MODAL ---------- */}
+      {/* GROUP MODAL */}
       {showGroupModal && (
         <div className="group-modal">
           <div className="group-modal-content">
@@ -295,20 +224,8 @@ function UsersList({ searchKey, onlineUser }) {
               ))}
             </div>
             <div className="group-modal-actions">
-              <button 
-                className="cancel-btn" 
-                onClick={() => setShowGroupModal(false)}
-                disabled={loading}
-              >
-                Cancel
-              </button>
-              <button 
-                className="create-btn" 
-                onClick={createGroup}
-                disabled={loading}
-              >
-                {loading ? "Creating..." : "Create"}
-              </button>
+              <button className="cancel-btn" onClick={() => setShowGroupModal(false)} disabled={loading}>Cancel</button>
+              <button className="create-btn" onClick={createGroup} disabled={loading}>{loading ? "Creating..." : "Create"}</button>
             </div>
           </div>
         </div>
