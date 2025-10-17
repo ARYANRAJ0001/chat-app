@@ -86,14 +86,7 @@ function Home(){
                     />
                 )}
 
-                {isMobileView && !selectedChat && !showChatArea && (
-                    <div className="mobile-empty-state">
-                        <div className="empty-state-content">
-                            <h3>Welcome to Chat App</h3>
-                            <p>Select a conversation to start chatting</p>
-                        </div>
-                    </div>
-                )}
+                
             </div>
         </div>
     );
