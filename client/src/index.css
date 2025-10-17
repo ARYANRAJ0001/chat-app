@@ -259,7 +259,18 @@ i {
   margin-bottom: 20px;
   position: relative;
   padding: 15px;
-  border-bottom: 1px solid #9d5b5b;
+  border-bottom: 1px solid #bb1515;
+color: #66545c; /* fully opaque */
+
+}
+.search-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #bb1515;
+  border-radius: 5px;
+  background-color: #5a575700; /* input background */
+  color: #66545c;            /* text color */
+  outline: none;
 }
 
 .user-search-text {
@@ -1238,3 +1249,4 @@ input[type="file"]::file-selector-button:active {
     font-size: 12px;
   }
 }
+/* Search component styles */
