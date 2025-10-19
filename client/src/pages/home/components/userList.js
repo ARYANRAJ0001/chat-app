@@ -1,13 +1,14 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
-import { createNewChat } from './../../../apiCalls/chat';
+import { createNewChat } from '../../../apiCalls/chat';
 import { hideLoader, showLoader } from "../../../redux/loaderSlice";
 import { setAllChats, setSelectedChat } from '../../../redux/usersSlice';
 
 function UsersList({ searchKey = "", onlineUser = [] }) {
-  const { allUsers = [], allChats = [], user: currentUser, selectedChat } = useSelector(state => state.userReducer);
   const dispatch = useDispatch();
+  const { allUsers = [], allChats = [], user: currentUser, selectedChat } = useSelector(state => state.userReducer);
+  
   const [loading, setLoading] = useState(false);
   const [showGroupModal, setShowGroupModal] = useState(false);
   const [groupName, setGroupName] = useState("");
@@ -20,40 +21,37 @@ function UsersList({ searchKey = "", onlineUser = [] }) {
     return timeB - timeA;
   });
 
-  // ---------- SORT INDIVIDUAL USERS (ONLY CHATS YOU CREATED) ----------
+  // ---------- SORT INDIVIDUAL USERS ----------
   const getSortedIndividualUsers = () => {
-  if (!currentUser || !allChats) return [];
+    if (!currentUser || !allChats) return [];
 
-  // Filter chats that are NOT group chats and include currentUser
-  const individualChats = allChats.filter(c => !c.isGroupChat && c.members?.map(m => m._id).includes(currentUser._id));
-
-  // Map to the other user in the chat
-  let usersFromChats = individualChats.map(c =>
-    c.members.find(m => m._id !== currentUser._id)
-  ).filter(Boolean);
-
-  // Remove duplicates
-  usersFromChats = Array.from(new Map(usersFromChats.map(u => [u._id, u])).values());
-
-  // If searchKey exists, include users from allUsers as well
-  if (searchKey?.trim()) {
-    const key = searchKey.toLowerCase();
-    const searchUsers = allUsers.filter(u =>
-      u._id !== currentUser._id &&
-      (
-        u.firstname?.toLowerCase().includes(key) ||
-        u.lastname?.toLowerCase().includes(key) ||
-        u.email?.toLowerCase().includes(key)
-      )
+    const individualChats = allChats.filter(
+      c => !c.isGroupChat && c.members?.map(m => m._id).includes(currentUser._id)
     );
-    // Combine and remove duplicates
-    const combined = [...usersFromChats, ...searchUsers];
-    return Array.from(new Map(combined.map(u => [u._id, u])).values());
-  }
 
-  return usersFromChats;
-};
+    let usersFromChats = individualChats.map(chat =>
+      chat.members.find(m => m._id !== currentUser._id)
+    ).filter(Boolean);
 
+    // Remove duplicates
+    usersFromChats = Array.from(new Map(usersFromChats.map(u => [u._id, u])).values());
+
+    if (searchKey?.trim()) {
+      const key = searchKey.toLowerCase();
+      const searchUsers = allUsers.filter(u =>
+        u._id !== currentUser._id &&
+        (
+          u.firstname?.toLowerCase().includes(key) ||
+          u.lastname?.toLowerCase().includes(key) ||
+          u.email?.toLowerCase().includes(key)
+        )
+      );
+      const combined = [...usersFromChats, ...searchUsers];
+      return Array.from(new Map(combined.map(u => [u._id, u])).values());
+    }
+
+    return usersFromChats;
+  };
 
   const sortedIndividualUsers = getSortedIndividualUsers();
 
@@ -69,8 +67,7 @@ function UsersList({ searchKey = "", onlineUser = [] }) {
 
       if (response.success) {
         toast.success(response.message || "Chat created!");
-        const updatedChats = [...allChats, response.data];
-        dispatch(setAllChats(updatedChats));
+        dispatch(setAllChats([...allChats, response.data]));
         dispatch(setSelectedChat(response.data));
       }
     } catch (error) {
@@ -102,8 +99,7 @@ function UsersList({ searchKey = "", onlineUser = [] }) {
 
       if (response.success) {
         toast.success("Group created successfully!");
-        const updatedChats = [...allChats, response.data];
-        dispatch(setAllChats(updatedChats));
+        dispatch(setAllChats([...allChats, response.data]));
         dispatch(setSelectedChat(response.data));
 
         setShowGroupModal(false);
@@ -118,13 +114,12 @@ function UsersList({ searchKey = "", onlineUser = [] }) {
   };
 
   // ---------- HELPERS ----------
- const isSelectedChat = (chatOrUser) => {
+  const isSelectedChat = (chatOrUser) => {
     if (!selectedChat || !chatOrUser) return false;
     if (chatOrUser._id && selectedChat._id) return selectedChat._id === chatOrUser._id;
     if (chatOrUser._id) return selectedChat.members?.map(m => m._id).includes(chatOrUser._id);
     return false;
-};
-
+  };
 
   const formatName = (user) => {
     if (!user) return "Unknown User";
@@ -150,7 +145,7 @@ function UsersList({ searchKey = "", onlineUser = [] }) {
 
       <div className="sidebar-scroll">
         {/* GROUP CHATS */}
-        {sortedGroupChats.length > 0 ? sortedGroupChats.map(chat => (
+        {sortedGroupChats.length > 0 && sortedGroupChats.map(chat => (
           <div
             key={chat._id}
             className={isSelectedChat(chat) ? "selected-user" : "filtered-user"}
@@ -164,39 +159,38 @@ function UsersList({ searchKey = "", onlineUser = [] }) {
               </div>
             </div>
           </div>
-        )) : null}
+        ))}
 
         {/* INDIVIDUAL USERS */}
-        {sortedIndividualUsers.length > 0 ? sortedIndividualUsers.map(user => {
-          const chat = allChats.find(c => !c.isGroupChat && c.members?.map(m => m._id).includes(user._id));
+        {sortedIndividualUsers.length > 0 && sortedIndividualUsers.map(u => {
+          const chat = allChats.find(c => !c.isGroupChat && c.members?.map(m => m._id).includes(u._id));
           return (
             <div
-              key={user._id}
-              className={isSelectedChat(chat || user) ? "selected-user" : "filtered-user"}
-           onClick={() => chat ? dispatch(setSelectedChat(chat)) : startNewChat(user._id)}
-
+              key={u._id}
+              className={isSelectedChat(chat || u) ? "selected-user" : "filtered-user"}
+              onClick={() => chat ? dispatch(setSelectedChat(chat)) : startNewChat(u._id)}
             >
               <div className="filter-user-display">
-                {user.profilePic ? (
+                {u.profilePic ? (
                   <img
-                    src={user.profilePic}
+                    src={u.profilePic}
                     alt="Profile Pic"
                     className="user-profile-image"
-                    style={onlineUser.includes(user._id) ? { border: '#82e0aa 3px solid' } : {}}
+                    style={onlineUser.includes(u._id) ? { border: '#82e0aa 3px solid' } : {}}
                   />
                 ) : (
-                  <div className="user-default-avatar" style={onlineUser.includes(user._id) ? { border: '#82e0aa 3px solid' } : {}}>
-                    {user.firstname?.charAt(0).toUpperCase()}{user.lastname?.charAt(0).toUpperCase()}
+                  <div className="user-default-avatar" style={onlineUser.includes(u._id) ? { border: '#82e0aa 3px solid' } : {}}>
+                    {u.firstname?.charAt(0).toUpperCase()}{u.lastname?.charAt(0).toUpperCase()}
                   </div>
                 )}
                 <div className="filter-user-details">
-                  <div className="user-display-name">{formatName(user)}</div>
-                  <div className="user-display-email">{user.email}</div>
+                  <div className="user-display-name">{formatName(u)}</div>
+                  <div className="user-display-email">{u.email}</div>
                 </div>
               </div>
             </div>
           )
-        }) : null}
+        })}
 
         {(sortedGroupChats.length === 0 && sortedIndividualUsers.length === 0) && (
           <div className="no-users-found">No users or chats found.</div>
