@@ -173,7 +173,8 @@ function UsersList({ searchKey = "", onlineUser = [] }) {
             <div
               key={user._id}
               className={isSelectedChat(chat || user) ? "selected-user" : "filtered-user"}
-              onClick={() => chat ? dispatch(setSelectedChat(chat)) : startNewChat(user._id)}
+           onClick={() => chat ? dispatch(setSelectedChat(chat)) : startNewChat(user._id)}
+
             >
               <div className="filter-user-display">
                 {user.profilePic ? (
