@@ -5,7 +5,7 @@ import { io } from 'socket.io-client';
 import ChatArea from "./components/chat";
 import Header from "./components/header";
 import Sidebar from "./components/sidebar";
-import { setSelectedChat } from "../redux/usersSlice";
+import { setSelectedChat } from "../../redux/usersSlice";
 
 const socket = io('http://localhost:3001'); // Replace with AWS IP if deployed
 
