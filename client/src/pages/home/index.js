@@ -4,6 +4,9 @@ import Header from "./components/header";
 import Sidebar from "./components/sidebar";
 import { io } from 'socket.io-client';
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { setSelectedChat } from "./../../../redux/usersSlice";
+const dispatch = useDispatch();
 
 const socket = io('http://localhost:3001');
 
@@ -46,7 +49,13 @@ function Home() {
         };
     }, [user]);
 
-    const handleBackToSidebar = () => setShowChatArea(false);
+  const handleBackToSidebar = () => {
+    dispatch(setSelectedChat(null)); // CLEAR selected chat
+    setShowChatArea(false);          // Hide chat area
+};
+const sidebar = document.querySelector('.sidebar-scroll');
+if (sidebar) sidebar.scrollTop = 0;
+
 
     if (!user) {
         return (
