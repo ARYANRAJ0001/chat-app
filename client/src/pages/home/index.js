@@ -1,17 +1,18 @@
-import { useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { io } from 'socket.io-client';
+
 import ChatArea from "./components/chat";
 import Header from "./components/header";
 import Sidebar from "./components/sidebar";
-import { io } from 'socket.io-client';
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { setSelectedChat } from "./../../../redux/usersSlice";
-const dispatch = useDispatch();
 
-const socket = io('http://localhost:3001');
+const socket = io('http://localhost:3001'); // Replace with AWS IP if deployed
 
 function Home() {
+    const dispatch = useDispatch();
     const { selectedChat, user } = useSelector(state => state.userReducer);
+
     const [onlineUser, setOnlineUser] = useState([]);
     const [isMobileView, setIsMobileView] = useState(window.innerWidth <= 768);
     const [showChatArea, setShowChatArea] = useState(false);
@@ -22,11 +23,11 @@ function Home() {
         const handleResize = () => {
             const mobile = window.innerWidth <= 768;
             setIsMobileView(mobile);
-            if (!mobile && showChatArea) setShowChatArea(false);
+            if (!mobile) setShowChatArea(false);
         };
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
-    }, [showChatArea]);
+    }, []);
 
     // Show chat area in mobile view when chat is selected
     useEffect(() => {
@@ -49,13 +50,15 @@ function Home() {
         };
     }, [user]);
 
-  const handleBackToSidebar = () => {
-    dispatch(setSelectedChat(null)); // CLEAR selected chat
-    setShowChatArea(false);          // Hide chat area
-};
-const sidebar = document.querySelector('.sidebar-scroll');
-if (sidebar) sidebar.scrollTop = 0;
+    // Back button for mobile view
+    const handleBackToSidebar = () => {
+        dispatch(setSelectedChat(null)); // Clear selected chat
+        setShowChatArea(false);          // Hide chat area
 
+        // Scroll sidebar to top
+        const sidebar = document.querySelector('.sidebar-scroll');
+        if (sidebar) sidebar.scrollTop = 0;
+    };
 
     if (!user) {
         return (
