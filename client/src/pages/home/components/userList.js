@@ -118,11 +118,13 @@ function UsersList({ searchKey = "", onlineUser = [] }) {
   };
 
   // ---------- HELPERS ----------
-  const isSelectedChat = (chatOrUser) => {
+ const isSelectedChat = (chatOrUser) => {
     if (!selectedChat || !chatOrUser) return false;
-    if (chatOrUser.members) return selectedChat._id === chatOrUser._id;
-    return selectedChat.members?.map(m => m._id).includes(chatOrUser._id);
-  };
+    if (chatOrUser._id && selectedChat._id) return selectedChat._id === chatOrUser._id;
+    if (chatOrUser._id) return selectedChat.members?.map(m => m._id).includes(chatOrUser._id);
+    return false;
+};
+
 
   const formatName = (user) => {
     if (!user) return "Unknown User";
