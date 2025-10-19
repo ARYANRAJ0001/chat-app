@@ -184,10 +184,11 @@ function ChatArea({ socket, onBack, isMobileView }){
         <div className="app-chat-area">
             <div className="app-chat-area-header">
                 {isMobileView && (
-                    <button className="back-button" onClick={onBack}>
-                        <i className="fa fa-arrow-left"></i>
-                    </button>
-                )}
+    <button className="back-button" onClick={onBack}>
+        <i className="fa fa-arrow-left"></i>
+    </button>
+)}
+
                 <span className="chat-header-name">{getChatName()}</span>
             </div>
 
