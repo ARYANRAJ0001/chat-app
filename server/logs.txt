@@ -1,0 +1,47 @@
+> chatapp-server@1.0.0 start
+> node server.js
+
+[dotenv@17.2.2] injecting env (3) from config.env -- tip: 📡 version env with Radar: https://dotenvx.com/radar
+Listening to requests on PORT: 3001
+DB Connection Successful!
+
+POST /api/v1/auth/register called
+Register request body: {
+  firstname: 'aryan',
+  lastname: 'raj',
+  email: 'aryan@32111',
+  password: '$2b$10$2SG3deEEJu.PWFPyyooJDOV0qGRAuYQQ.0fdqSMDId/NHtOM4GO0e'
+}
+User registered: aryan@32111
+
+POST /api/v1/auth/register called
+Register request body: {
+  firstname: 'riya',
+  lastname: 'sharma',
+  email: 'riya@test.com',
+  password: '$2b$10$abc123hashedpasswordxyz456'
+}
+User registered: riya@test.com
+
+POST /api/v1/auth/login called
+User logged in successfully: aryanssm2006@gmail.com
+
+POST /api/v1/auth/login called
+User logged in successfully: riya@test.com
+
+
+POST /api/v1/messages called
+Message created by userId: 64fabc123456
+Message content: "Hello, this is Aryan!"
+
+POST /api/v1/messages called
+Message created by userId: 64fabc789012
+Message content: "Hi Aryan! Welcome to the chat."
+
+GET /api/v1/messages called
+Fetched messages count: 2
+
+DELETE /api/v1/messages/64fabc123456 called
+Message deleted by adminId: 64fabc789012
+
+

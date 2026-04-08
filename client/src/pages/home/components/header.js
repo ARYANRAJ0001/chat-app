@@ -19,7 +19,7 @@ function Header( {socket }){
     const logout = () => {
         localStorage.removeItem('token');
         navigate('/login');
-        socket.emit('user-offline', user._id);
+        socket.emit('user-offline', user._id); 
     }
 
     return (

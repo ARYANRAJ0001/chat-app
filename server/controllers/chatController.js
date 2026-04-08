@@ -3,9 +3,7 @@ const authMiddleware = require('../middlewares/authMiddleware');
 const Chat = require('./../models/chat');
 const Message = require('./../models/message');
 
-/**
- * 📌 Create New Chat (Single or Group)
- */
+
 router.post('/create-new-chat', authMiddleware, async (req, res) => {
     try {
         const { members, isGroupChat, groupName } = req.body;
@@ -44,9 +42,7 @@ router.post('/create-new-chat', authMiddleware, async (req, res) => {
     }
 });
 
-/**
- * 📌 Get All Chats (Single + Groups)
- */
+
 router.get('/get-all-chats', authMiddleware, async (req, res) => {
     try {
         const allChats = await Chat.find({ members: { $in: [req.userId] } })
@@ -64,9 +60,7 @@ router.get('/get-all-chats', authMiddleware, async (req, res) => {
     }
 });
 
-/**
- * 📌 Add Member to Group Chat
- */
+
 router.post('/add-member', authMiddleware, async (req, res) => {
     try {
         const { chatId, userId } = req.body;
@@ -88,9 +82,7 @@ router.post('/add-member', authMiddleware, async (req, res) => {
     }
 });
 
-/**
- * 📌 Remove Member from Group Chat
- */
+
 router.post('/remove-member', authMiddleware, async (req, res) => {
     try {
         const { chatId, userId } = req.body;
@@ -111,9 +103,7 @@ router.post('/remove-member', authMiddleware, async (req, res) => {
     }
 });
 
-/**
- * 📌 Clear Unread Messages
- */
+ 
 router.post('/clear-unread-message', authMiddleware, async (req, res) => {
     try {
         const { chatId } = req.body;

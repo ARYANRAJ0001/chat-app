@@ -191,21 +191,31 @@ function ChatArea({ socket, onBack, isMobileView }){
                 <span className="chat-header-name">{getChatName()}</span>
             </div>
 
+            {/* UPDATED MESSAGES SECTION WITH SENDER NAMES */}
             <div className="main-chat-area" id="main-chat-area">
                 {allMessages.map((msg, index) => {
                     const isCurrentUserSender = msg.sender === user._id;
+                    const senderUser = selectedChat.members.find(member => member._id === msg.sender);
+                    const senderName = senderUser ? formatName(senderUser) : 'Unknown User';
 
                     return (
                         <div 
-                            className="message-container" 
+                            className={`message-container ${isCurrentUserSender ? 'send-message' : 'received-message'}`}
                             key={msg._id || index}
-                            style={isCurrentUserSender ? {justifyContent: 'flex-end'} : {justifyContent: 'flex-start'}}
                         >
                             <div className="message-wrapper">
-                                <div className={isCurrentUserSender ? "send-message" : "received-message"}>
+                                {/* Sender name - first line */}
+                                <div className="sender-name">
+                                    {isCurrentUserSender ? 'You' : senderName}
+                                </div>
+                                
+                                {/* Message content - second line */}
+                                <div className="message-content">
                                     {msg.text && <div className="message-text">{msg.text}</div>}
                                     {msg.image && <img src={msg.image} alt="sent" className="message-image" />}
                                 </div>
+                                
+                                {/* Timestamp - third line */}
                                 <div className="message-timestamp">
                                     {formatTime(msg.createdAt)} 
                                     {isCurrentUserSender && msg.read && 
@@ -230,45 +240,53 @@ function ChatArea({ socket, onBack, isMobileView }){
                     />
                 </div>
             }
-            <div className="send-message-div">
-                <input 
-                    type="text" 
-                    className="send-message-input" 
-                    placeholder="Type a message"
-                    value={message}
-                    onChange={ (e) => { 
-                        setMessage(e.target.value)
-                        socket.emit('user-typing', {
-                            chatId: selectedChat._id,
-                            members: selectedChat.members.map(m => m._id),
-                            sender: user._id
-                        })
-                    }}
-                />
-                
-                <label htmlFor="file" className="file-input-label">
-                    <i className="fa fa-picture-o send-image-btn"></i>
-                    <input
-                        type="file"
-                        id="file"
-                        className="file-input"
-                        accept="image/jpg,image/png,image/jpeg,image/gif"
-                        onChange={sendImage}
-                    />
-                </label>
 
-                <button 
-                    className="send-emoji-btn" 
-                    onClick={ () => { setShowEmojiPicker(!showEmojiPicker)} }
-                >
-                    <i className="fa fa-smile-o"></i>
-                </button>
-                <button 
-                    className="send-message-btn" 
-                    onClick={ () => sendMessage('') }
-                >
-                    <i className="fa fa-paper-plane"></i>
-                </button>
+            {/* NEW: Updated message input structure */}
+            <div className="send-message-div">
+                {/* First line - only input */}
+                <div className="input-row">
+                    <input 
+                        type="text" 
+                        className="send-message-input" 
+                        placeholder="Type a message"
+                        value={message}
+                        onChange={ (e) => { 
+                            setMessage(e.target.value)
+                            socket.emit('user-typing', {
+                                chatId: selectedChat._id,
+                                members: selectedChat.members.map(m => m._id),
+                                sender: user._id
+                            })
+                        }}
+                    />
+                </div>
+                
+                {/* Second line - only buttons */}
+                <div className="button-row">
+                    <label htmlFor="file" className="file-input-label">
+                        <i className="fa fa-picture-o send-image-btn"></i>
+                        <input
+                            type="file"
+                            id="file"
+                            className="file-input"
+                            accept="image/jpg,image/png,image/jpeg,image/gif"
+                            onChange={sendImage}
+                        />
+                    </label>
+
+                    <button 
+                        className="send-emoji-btn" 
+                        onClick={ () => { setShowEmojiPicker(!showEmojiPicker)} }
+                    >
+                        <i className="fa fa-smile-o"></i>
+                    </button>
+                    <button 
+                        className="send-message-btn" 
+                        onClick={ () => sendMessage('') }
+                    >
+                        <i className="fa fa-paper-plane"></i>
+                    </button>
+                </div>
             </div>
         </div>
     );
