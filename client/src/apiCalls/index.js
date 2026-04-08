@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const url = "https://chat-app-appp.onrender.com";
+export const url = "https://chat-app-aryan.onrender.com";
 
 export const axiosInstance = axios.create({
     headers: {
