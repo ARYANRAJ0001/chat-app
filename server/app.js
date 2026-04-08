@@ -16,7 +16,7 @@ app.use(express.json({
 const server = require('http').createServer(app);
 
 const io = require('socket.io')(server, {cors: {
-    origin: 'https://chat-app-u7z9.vercel.app/',
+    origin: 'https://chat-app-app-aryan.onrender.com',
     methods: ['GET', 'POST']
 }})
 
