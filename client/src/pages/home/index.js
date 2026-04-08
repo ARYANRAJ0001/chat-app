@@ -12,7 +12,7 @@ function Home() {
     const [onlineUser, setOnlineUser] = useState([]);
     const [isMobileView, setIsMobileView] = useState(window.innerWidth <= 768);
     const [showChatArea, setShowChatArea] = useState(false);
-    const [searchKey, setSearchKey] = use("");eStat
+    const [searchKey, setSearchKey] = useState("");
 
     // Handle window resize
     useEffect(() => {
